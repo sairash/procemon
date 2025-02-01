@@ -1,18 +1,21 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.json`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import Procemon from "./procemon";
+export interface Env {}
 
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
-	},
-} satisfies ExportedHandler<Env>;
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const params = url.searchParams;
+
+    const size = params.get('size') || '32';
+    const color = params.get('color') || 'white';
+    const background = params.get('background') || 'black';
+
+    const p = new Procemon(parseInt(size));
+    const svg = p.plot_svg(background, color);
+
+
+    return new Response(svg, {
+      headers: { 'Content-Type': 'image/svg+xml' }
+    });
+  }
+};
